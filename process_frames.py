@@ -17,19 +17,21 @@ frames = []
 
 while(cap.isOpened()):
     ret, frame = cap.read()
-    if ret==True:
-        frames.append(frame)
-        
-        # frame = cv2.flip(frame,0)
 
-        # # write the flipped frame
-        # out.write(frame)
-
-        # cv2.imshow('frame',frame)
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-        #     break
-    else:
+    # stop when no more frames to read
+    if ret == False:
         break
+        
+    frames.append(frame)
+    
+    # frame = cv2.flip(frame,0)
+
+    # # write the flipped frame
+    # out.write(frame)
+
+    # cv2.imshow('frame',frame)
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #     break
 
 for frame in frames:
     out.write(cv2.flip(frame, 0))
