@@ -14,8 +14,20 @@ class Frame:
         (self.B, self.G, self.R) = cv.split(self.raw_array)
 
         # relative luminance values for RGB
-        self.R = self.R / 255.0
-        if self.R <= 0.03928:
-            self.R = self.R / 12.92
-        else:
-            self.R = ((self.R + 0.055) / 1.055) ** 2.4
+        self.R = calculate_channel(self.R)
+        self.G = calculate_channel(self.G)
+        self.B = calculate_channel(self.B)
+        self.L = 0.2126 * self.R + \
+                 0.1750 * self.G + \
+                 0.0722 * self.B
+
+
+def calculate_channel(c):
+    """Converts sRGB values to RGB values used for relative luminance."""
+
+    c = c / 255.0
+    if c <= 0.03928:
+        c = c / 12.92
+    else:
+        c = ((c + 0.055) / 1.055) ** 2.4
+    return c
