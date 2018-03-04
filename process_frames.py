@@ -2,14 +2,16 @@ import numpy as np
 import cv2
 
 cap = cv2.VideoCapture('aotl')
-original_fps = cap.get(cv2.cv.CV_CAP_PROP_FPS)
+orig_fps = cap.get(cv2.cv.CV_CAP_PROP_FPS)
+orig_width = int(cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH))
+orig_height = int(cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT))
 
 # Define the codec and create VideoWriter object
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 fourcc = cv2.cv.CV_FOURCC(*'XVID')
 
 # name, fourcc, fps, framesize, [isColor]
-out = cv2.VideoWriter('output.avi',fourcc, original_fps, (640,480))
+out = cv2.VideoWriter('output.avi',fourcc, orig_fps, (orig_width, orig_height))
 
 frames = []
 
