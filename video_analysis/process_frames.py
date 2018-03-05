@@ -38,6 +38,10 @@ for idx, current_frame in enumerate(frames[1:]):
         # red transition found
         red_idxs.append(idx)
 
+# TODO: general_idxs and red_idxs now have the indexes where there are potentially
+# dangerous flashes. Convert indexes to timestamps to be used in the UI.
+# If both lists are empty, video is clean.
+
 # print (general_idxs)
 # print (red_idxs)
 
