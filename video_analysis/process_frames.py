@@ -67,3 +67,31 @@ for idx, current_frame in enumerate(frames[1:]):
 # Release everything if job is finished
 cap.release()
 cv2.destroyAllWindows()
+
+
+def general_transition(previous_frame, current_frame):
+    height = previous_frame.raw_array.shape[0]
+    width = previous_frame.raw_array.shape[1]
+
+    # fixme - not sure what maximum luminance means
+    # # maximum L among all pixels in both frames
+    # max_L = 0.0
+
+    general_count = 0
+    for x in range(height):
+        for y in range(width):
+            darker_L = 0
+            lighter_L = 0
+            if current_frame.L < previous_frame.L:
+                darker_L = current_frame.L
+                lighter_L = previous_frame.L
+            else:
+                darker_L = previous_frame.L
+                lighter_L = current_frame.L
+
+            if darker_L < 0.8 and lighter_L - darker_L > lighter_L * 0.1:
+                general_count = general_count + 1
+    if general_count / 36 > previous_frame.size:
+        # detected
+        return True
+    return False
