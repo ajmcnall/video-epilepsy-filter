@@ -28,21 +28,8 @@ red_idxs = []
 for idx, current_frame in enumerate(frames[1:]):
     previous_frame = frames[idx - 1]
 
-    # darker_L = 0
-    # lighter_L = 0
-    # if current_frame.L < previous_frame.L:
-    #     darker_L = current_frame.L
-    #     lighter_L = previous_frame.L
-    # else:
-    #     darker_L = previous_frame.L
-    #     lighter_L = current_frame.L
-
     # general oppositing transition formula
-    # fixme - this following part should be in a loop
-    # and pixels should be considered epileptic individually before seeing if
-    # total # epileptic pixels > all pixels in the frame/36
-    if (current_frame.L < 0.8 or previous_frame < 0.8) and \
-       current_frame.L - previous_frame.L > lighter_L * 0.10:
+    if general_transition(previous_frame, current_frame):
         # opposing transition found
         general_idxs.append(idx)
 
