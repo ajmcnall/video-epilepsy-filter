@@ -34,17 +34,7 @@ for idx, current_frame in enumerate(frames[1:]):
         general_idxs.append(idx)
 
     # red opposing transition formula
-    # it's possible previous threshold isn't needed - fixme - see algorithm again
-    previous_threshold = previous_frame.R / (previous_frame.R + previous_frame.G + previous_frame.B)
-    current_threshold = current_frame.R / (current_frame.R + current_frame.G + current_frame.B)
-
-    previous_delta = (previous_frame.R - previous_frame.G - previous_frame.B) * 320
-    current_delta = (current_frame.R - current_frame.G - current_frame.B) * 320
-
-    # fixme - do this following part pixel by pixel, 
-    # then see if total number of detected pixels is greater than 1/36 of total pixels
-    if previous_threshold > 0.80 and current_threshold > 0.80 and \
-        current_delta - previous_delta > 0:
+    if red_transition(previous_frame, current_frame):
         # red transition found
         red_idxs.append(idx)
 
@@ -82,3 +72,33 @@ def general_transition(previous_frame, current_frame):
         # detected
         return True
     return False
+
+
+def red_transition(previous_frame, current_frame):
+    height = previous_frame.raw_array.shape[0]
+    width = previous_frame.raw_array.shape[1]
+
+    red_count = 0
+    for x in range(height):
+        for y in range(width):
+            # red opposing transition formula
+            # it's possible previous threshold isn't needed - fixme - see algorithm again
+            previous_threshold = previous_frame.R[x][y] / \
+                                 (previous_frame.R[x][y] + previous_frame.G[x][y] + previous_frame.B[x][y])
+            current_threshold = current_frame.R[x][y] / \
+                                (current_frame.R[x][y] + current_frame.G[x][y] + current_frame.B[x][y])
+
+            previous_delta = (previous_frame.R[x][y] - previous_frame.G[x][y] - previous_frame.B[x][y]) * 320
+            current_delta = (current_frame.R[x][y] - current_frame.G[x][y] - current_frame.B[x][y]) * 320
+
+            # fixme - do this following part pixel by pixel, 
+            # then see if total number of detected pixels is greater than 1/36 of total pixels
+            if previous_threshold > 0.80 and current_threshold > 0.80 and \
+                current_delta - previous_delta > 0:
+                # red transition found
+                red_count = red_count + 1
+    
+    if red_count / 36 > previous_frame.raw_array.size:
+        return True
+    return False
+
