@@ -36,11 +36,13 @@ def calculate_channel(c):
     width = c.shape[1]
 
     # do calculations for each pixel in frame (AKA each value in array)
+    c = c / 255.0
+
     for x in range(height):
         for y in range(width):
             pixel = c[x][y]
 
-            pixel = pixel / 255.0
+            # pixel = pixel / 255.0
             if pixel <= 0.03928:
                 pixel = pixel / 12.92
             else:
