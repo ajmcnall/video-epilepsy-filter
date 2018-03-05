@@ -82,16 +82,16 @@ def general_transition(previous_frame, current_frame):
         for y in range(width):
             darker_L = 0
             lighter_L = 0
-            if current_frame.L < previous_frame.L:
-                darker_L = current_frame.L
-                lighter_L = previous_frame.L
+            if current_frame.L[x][y] < previous_frame.L[x][y]:
+                darker_L = current_frame.L[x][y]
+                lighter_L = previous_frame.L[x][y]
             else:
-                darker_L = previous_frame.L
-                lighter_L = current_frame.L
+                darker_L = previous_frame.L[x][y]
+                lighter_L = current_frame.L[x][y]
 
             if darker_L < 0.8 and lighter_L - darker_L > lighter_L * 0.1:
                 general_count = general_count + 1
-    if general_count / 36 > previous_frame.size:
+    if general_count / 36 > previous_frame.raw_array.size:
         # detected
         return True
     return False
