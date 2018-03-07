@@ -22,7 +22,7 @@ def general_transition(previous_frame, current_frame):
             else:
                 darker_L = previous_frame.L[x][y]
                 lighter_L = current_frame.L[x][y]
-
+            
             if darker_L < 0.8 and lighter_L - darker_L > lighter_L * 0.1:
                 general_count = general_count + 1
     if general_count > previous_frame.raw_array.size / 36:
@@ -114,10 +114,6 @@ for idx, current_frame in enumerate(frames[1:]):
 # If both lists are empty, video is clean.
 process_idxs(general_idxs)
 process_idxs(red_idxs)
-
-
-# print (general_idxs)
-# print (red_idxs)
 
 # Release everything if job is finished
 cap.release()
