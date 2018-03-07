@@ -41,6 +41,9 @@ for idx, current_frame in enumerate(frames[1:]):
 # TODO: general_idxs and red_idxs now have the indexes where there are potentially
 # dangerous flashes. Convert indexes to timestamps to be used in the UI.
 # If both lists are empty, video is clean.
+process_idxs(general_idxs)
+process_idxs(red_idxs)
+
 
 # print (general_idxs)
 # print (red_idxs)
@@ -106,3 +109,7 @@ def red_transition(previous_frame, current_frame):
         return True
     return False
 
+
+def process_idxs(idxs):
+    idx_iter = iter(idxs)
+    pass
