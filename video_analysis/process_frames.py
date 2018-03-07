@@ -10,6 +10,10 @@ frames = []
 # fixme - remove the 60 limit later
 while(cap.isOpened() and len(frames) <= 60):
     ret, frame = cap.read()
+    print(frame.shape)
+    print(frame[0][0])
+    print(frame[0][0][2])
+    exit(1)
 
     # stop when no more frames to read
     if ret == False:
@@ -75,7 +79,7 @@ def general_transition(previous_frame, current_frame):
 
             if darker_L < 0.8 and lighter_L - darker_L > lighter_L * 0.1:
                 general_count = general_count + 1
-    if general_count / 36 > previous_frame.raw_array.size:
+    if general_count > previous_frame.raw_array.size / 36:
         # detected
         return True
     return False
@@ -105,7 +109,7 @@ def red_transition(previous_frame, current_frame):
                 # red transition found
                 red_count = red_count + 1
     
-    if red_count / 36 > previous_frame.raw_array.size:
+    if red_count > previous_frame.raw_array.size / 36:
         return True
     return False
 
