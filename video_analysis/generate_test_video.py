@@ -2,12 +2,12 @@ import numpy as np
 import cv2
 
 # Define codec and create VideoWriter object
-fourcc = cv2.cv.CV_FOURCC(*'XVID')
+fourcc = cv2.cv.CV_FOURCC(*'MJPG')
 out = cv2.VideoWriter('test_video.avi', fourcc, 10.0, (4, 3), True)
 
 # row, column, RGB
-light_frame = np.zeros((4, 3, 3))
-dark_frame = np.zeros((4, 3, 3))
+light_frame = np.zeros((3, 4, 3))
+dark_frame = np.zeros((3, 4, 3))
 dark_frame.fill(255)
 
 # convert to 8bit so it works with VideoWriter.write()
