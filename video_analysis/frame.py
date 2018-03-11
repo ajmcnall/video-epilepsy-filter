@@ -32,22 +32,10 @@ def calculate_channel(c):
     # get the dimensions of the numpy array
     # reminder - numpy arrays are 
     # arr[row][col] == arr[x down][y right] == arr[height][width]
-    height = c.shape[0]
-    width = c.shape[1]
-
     # do calculations for each pixel in frame (AKA each value in array)
     c = c / 255.0
 
-    for x in range(height):
-        for y in range(width):
-            pixel = c[x][y]
-
-            # pixel = pixel / 255.0
-            if pixel <= 0.03928:
-                pixel = pixel / 12.92
-            else:
-                pixel = ((pixel + 0.055) / 1.055) ** 2.4
-
-            c[x][y] = pixel
+    c[c<=0.03928] /= 12.92
+    c[c>0.03928] = ((c[c>0.03928] + 0.055) / 1.055) ** 2.4
 
     return c
