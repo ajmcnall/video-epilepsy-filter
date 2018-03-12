@@ -2,35 +2,22 @@ import numpy as np
 import cv2
 from frame import Frame
 
-
 def general_transition(previous_frame, current_frame):
     height = previous_frame.raw_array.shape[0]
     width = previous_frame.raw_array.shape[1]
 
+    
     # fixme - not sure what maximum luminance means
     # # maximum L among all pixels in both frames
     # max_L = 0.0
 
-    general_count = 0
-    for x in range(height):
-        for y in range(width):
-            darker_L = 0
-            lighter_L = 0
-            if current_frame.L[x][y] < previous_frame.L[x][y]:
-                darker_L = current_frame.L[x][y]
-                lighter_L = previous_frame.L[x][y]
-            else:
-                darker_L = previous_frame.L[x][y]
-                lighter_L = current_frame.L[x][y]
+    selection = current_frame.L[(np.minimum(current_frame.L, previous_frame.L) < 0.8) & (abs(current_frame.L - previous_frame.L) > (np.maximum(current_frame.L, previous_frame.L) * 0.1))]
 
-            if darker_L < 0.8 and lighter_L - darker_L > lighter_L * 0.1:
-                general_count = general_count + 1
-    if general_count > previous_frame.raw_array.size / 36:
-        # detected
+    if len(selection) > (previous_frame.raw_array.size / 36):
         return True
     return False
 
-
+  
 def red_transition(previous_frame, current_frame):
     height = previous_frame.raw_array.shape[0]
     width = previous_frame.raw_array.shape[1]
@@ -64,28 +51,30 @@ def red_transition(previous_frame, current_frame):
     
     if red_count > previous_frame.raw_array.size / 36:
         return True
-    return False
-
-
+    return False  
+  
+  
 def process_idxs(idxs):
+    # not finished yet - TODO
     print(len(idxs))
     idx_iter = iter(idxs)
     pass
-
-
+  
+  
 # string is the name of the video we want to analyze
-cap = cv2.VideoCapture('test_video.avi')
+cap = cv2.VideoCapture('aotl')
+print cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
 frames = []
 
-# fixme - remove the 60 limit later - and len(frames) <= 60
-while(cap.isOpened()):
+# fixme - remove the 60 limit later
+while(cap.isOpened() and len(frames) < 1000):
     ret, frame = cap.read()
 
     # stop when no more frames to read
     if ret == False:
         break
-        
+    
     frames.append(Frame(frame))
 
     # Algorithm detection can be put here so that each new frame
@@ -95,6 +84,7 @@ while(cap.isOpened()):
 general_idxs = []
 red_idxs = []
 
+print "stop"
 # Start on second frame so you can compare it to first frame
 for idx, current_frame in enumerate(frames[1:]):
     previous_frame = frames[idx - 1]
@@ -105,19 +95,18 @@ for idx, current_frame in enumerate(frames[1:]):
         general_idxs.append(idx)
 
     # red opposing transition formula
-    if red_transition(previous_frame, current_frame):
+#    if red_transition(previous_frame, current_frame):
         # red transition found
-        red_idxs.append(idx)
+#        red_idxs.append(idx)
 
 # TODO: general_idxs and red_idxs now have the indexes where there are potentially
 # dangerous flashes. Convert indexes to timestamps to be used in the UI.
 # If both lists are empty, video is clean.
-process_idxs(general_idxs)
-process_idxs(red_idxs)
+# process_idxs(general_idxs)
+# process_idxs(red_idxs)
 
-
-# print (general_idxs)
-# print (red_idxs)
+print (general_idxs)
+print (red_idxs)
 
 # Release everything if job is finished
 cap.release()
