@@ -87,18 +87,20 @@ def query_video():
     videoURL = request.form['videoURL']
     videoID = getVideoID(videoURL)
     
+    print videoURL
     result = read(id)
+    '''
     if result is None:
         #isSafe = processVideo blah blah blah
     else:
         #Pare the value out of the result
-    
+    '''
     #placeholder for now
     isSafe = False
 
     output = '%r' % isSafe
 
-    return output, 200, {'Content-Type': 'text/plain; charset=utf-8'}
+    return output
 
 
 @app.errorhandler(500)
