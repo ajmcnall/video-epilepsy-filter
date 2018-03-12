@@ -5,34 +5,16 @@ from frame import Frame
 def general_transition(previous_frame, current_frame):
     height = previous_frame.raw_array.shape[0]
     width = previous_frame.raw_array.shape[1]
-
     
     # fixme - not sure what maximum luminance means
     # # maximum L among all pixels in both frames
     # max_L = 0.0
 
-<<<<<<< HEAD
-    general_count = 0
-    for x in range(height):
-        for y in range(width):
-            darker_L = 0
-            lighter_L = 0
-            if current_frame.L[x][y] < previous_frame.L[x][y]:
-                darker_L = current_frame.L[x][y]
-                lighter_L = previous_frame.L[x][y]
-            else:
-                darker_L = previous_frame.L[x][y]
-                lighter_L = current_frame.L[x][y]
-            
-            if darker_L < 0.8 and lighter_L - darker_L > lighter_L * 0.1:
-                general_count = general_count + 1
-    if general_count > previous_frame.raw_array.size / 36:
-        # detected
-=======
-    selection = current_frame.L[(np.minimum(current_frame.L, previous_frame.L) < 0.8) & (abs(current_frame.L - previous_frame.L) > (np.maximum(current_frame.L, previous_frame.L) * 0.1))]
+    selection = current_frame.L[(np.minimum(current_frame.L, previous_frame.L) < 0.8) & \
+                (abs(current_frame.L - previous_frame.L) > \
+                (np.maximum(current_frame.L, previous_frame.L) * 0.1))]
 
     if len(selection) > (previous_frame.raw_array.size / 36):
->>>>>>> 55ae6852d054549c2c8fd8f5d22785c2d52f7e27
         return True
     return False
 
