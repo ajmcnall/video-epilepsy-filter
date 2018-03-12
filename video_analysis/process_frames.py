@@ -17,6 +17,7 @@ def general_transition(previous_frame, current_frame):
         return True
     return False
 
+  
 def red_transition(previous_frame, current_frame):
     height = previous_frame.raw_array.shape[0]
     width = previous_frame.raw_array.shape[1]
@@ -26,10 +27,17 @@ def red_transition(previous_frame, current_frame):
         for y in range(width):
             # red opposing transition formula
             # it's possible previous threshold isn't needed - fixme - see algorithm again
-            previous_threshold = previous_frame.R[x][y] / \
-                                 (previous_frame.R[x][y] + previous_frame.G[x][y] + previous_frame.B[x][y])
-            current_threshold = current_frame.R[x][y] / \
-                                (current_frame.R[x][y] + current_frame.G[x][y] + current_frame.B[x][y])
+
+            previous_rgb_sum = previous_frame.R[x][y] + previous_frame.G[x][y] + previous_frame.B[x][y]
+            # prevent divide by zero error
+            if previous_rgb_sum == 0:
+                previous_rgb_sum = 1
+            previous_threshold = previous_frame.R[x][y] / previous_rgb_sum
+
+            current_rgb_sum = current_frame.R[x][y] + current_frame.G[x][y] + current_frame.B[x][y]
+            if current_rgb_sum == 0:
+                current_rgb_sum = 1
+            current_threshold = current_frame.R[x][y] / current_rgb_sum
 
             previous_delta = (previous_frame.R[x][y] - previous_frame.G[x][y] - previous_frame.B[x][y]) * 320
             current_delta = (current_frame.R[x][y] - current_frame.G[x][y] - current_frame.B[x][y]) * 320
@@ -41,11 +49,18 @@ def red_transition(previous_frame, current_frame):
                 # red transition found
                 red_count = red_count + 1
     
-    if red_count / 36 > previous_frame.raw_array.size:
+    if red_count > previous_frame.raw_array.size / 36:
         return True
-    return False
-
-
+    return False  
+  
+  
+def process_idxs(idxs):
+    # not finished yet - TODO
+    print(len(idxs))
+    idx_iter = iter(idxs)
+    pass
+  
+  
 # string is the name of the video we want to analyze
 cap = cv2.VideoCapture('aotl')
 print cap.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -87,6 +102,8 @@ for idx, current_frame in enumerate(frames[1:]):
 # TODO: general_idxs and red_idxs now have the indexes where there are potentially
 # dangerous flashes. Convert indexes to timestamps to be used in the UI.
 # If both lists are empty, video is clean.
+# process_idxs(general_idxs)
+# process_idxs(red_idxs)
 
 print (general_idxs)
 print (red_idxs)
@@ -94,6 +111,4 @@ print (red_idxs)
 # Release everything if job is finished
 cap.release()
 cv2.destroyAllWindows()
-
-
 
