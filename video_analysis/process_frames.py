@@ -10,6 +10,10 @@ def general_transition(previous_frame, current_frame):
     # # maximum L among all pixels in both frames
     # max_L = 0.0
 
+    # print(np.minimum(current_frame.L, previous_frame.L))
+    # print(abs(current_frame.L - previous_frame.L))
+    # print(np.maximum(current_frame.L, previous_frame.L) * 0.1)
+
     selection = current_frame.L[(np.minimum(current_frame.L, previous_frame.L) < 0.8) & \
                 (abs(current_frame.L - previous_frame.L) > \
                 (np.maximum(current_frame.L, previous_frame.L) * 0.1))]
@@ -63,8 +67,8 @@ def process_idxs(idxs):
   
   
 # string is the name of the video we want to analyze
-cap = cv2.VideoCapture('aotl')
-print cap.get(cv2.CAP_PROP_FRAME_COUNT)
+cap = cv2.VideoCapture('../test_video.avi')
+# print cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
 frames = []
 
@@ -87,7 +91,7 @@ red_idxs = []
 
 print "stop"
 # Start on second frame so you can compare it to first frame
-for idx, current_frame in enumerate(frames[1:]):
+for idx, current_frame in enumerate(frames):
     previous_frame = frames[idx - 1]
 
     # general oppositing transition formula
