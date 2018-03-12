@@ -17,7 +17,7 @@ class ProcessedVideos(db.Model):
     isSafe = db.Column(db.Boolean, nullable=False)
     
     def __repr__(self):
-        return '<ProcessedVideos(videoID= %s, isSafe= %b)>' % (self.videoID, self.isSafe)
+        return '<ProcessedVideos(videoID= %s, isSafe= %r)>' % (self.videoID, self.isSafe)
     
 def from_sql(row):
     """Translates a SQLAlchemy model instance into a dictionary"""
