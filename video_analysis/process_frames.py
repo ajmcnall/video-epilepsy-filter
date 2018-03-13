@@ -115,11 +115,14 @@ while(cap.isOpened()):
 
         # Technically not needed
         upper_bound = frame_counter
-        if lower_bound >= upper_bound:
+        if lower_bound > upper_bound:
             sys.stderr.write('Error: lower_bound is too high.')
 
         for idx, frame in enumerate(general_idxs):
-            if frame < lower_bound:
+            if frame < lower_bound - 1: # without the -1, we pop crucial frames
+                print frame
+                print lower_bound
+                print general_idxs
                 general_idxs.pop(idx)
             else:
                 break
@@ -128,6 +131,8 @@ while(cap.isOpened()):
             frame_tuples.append((lower_bound, frame_counter))
 
     frame_counter += 1
+
+print frame_tuples
 
 # Now that all the frames have been processed,
 # merge the frame intervals and convert to timestamps to be pushed into the database.
