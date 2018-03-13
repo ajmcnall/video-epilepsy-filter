@@ -58,7 +58,7 @@ def red_transition(previous_frame, current_frame):
   
   
 # string is the name of the video we want to analyze
-cap = cv2.VideoCapture('../test_video.avi')
+cap = cv2.VideoCapture('aotl')
 
 # lists for all the found transitions
 general_idxs = []
@@ -106,7 +106,10 @@ while(cap.isOpened()):
                 break
         transition_counter = len(general_idxs)
         if transition_counter >= TRANSITION_THRESHOLD:
-            frame_tuples.append((lower_bound, frame_counter))
+            # The epileptic range should be:
+            # From the first frame within the past second to have been detected
+            # To the most recently detected frame
+            frame_tuples.append((general_idxs[0], frame_counter))
 
     frame_counter += 1
 
