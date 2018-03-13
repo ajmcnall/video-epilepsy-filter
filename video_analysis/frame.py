@@ -19,7 +19,7 @@ class Frame:
         self.G = calculate_channel(self.G)
         self.B = calculate_channel(self.B)
         self.L = 0.2126 * self.R + \
-                 0.1750 * self.G + \
+                 0.7152 * self.G + \
                  0.0722 * self.B
 
 
@@ -33,6 +33,7 @@ def calculate_channel(c):
     # reminder - numpy arrays are 
     # arr[row][col] == arr[x down][y right] == arr[height][width]
     # do calculations for each pixel in frame (AKA each value in array)
+
     c = c / 255.0
 
     c[c<=0.03928] /= 12.92
