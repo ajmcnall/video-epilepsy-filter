@@ -132,7 +132,16 @@ while(cap.isOpened()):
 # Now that all the frames have been processed,
 # merge the frame intervals and convert to timestamps to be pushed into the database.
 # TODO
+# if not frame_tuples:    # it's empty, nothing detected!
+#     pass
 
+# I got this from stackoverflow 15273693
+merged_tuples = []
+for begin, end in frame_tuples:
+    if merged_tuples and merged_tuples[-1][1] >= begin - 1:
+        merged_tuples[-1][1] = max(merged_tuples[-1][1], end)
+    else:
+        merged_tuples.append([begin, end])
 
 # print "stop"
 # # Start on second frame so you can compare it to first frame
@@ -155,8 +164,9 @@ while(cap.isOpened()):
 # process_idxs(general_idxs)
 # process_idxs(red_idxs)
 
-print (general_idxs)
-print (red_idxs)
+# print (general_idxs)
+# print (red_idxs)
+print merged_tuples
 
 # Release everything if job is finished
 cap.release()
