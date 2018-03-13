@@ -2,7 +2,7 @@ import logging
 import os
 import socket
 
-import urlparse
+from urlparse import parse_qs, urlparse
 
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
@@ -20,26 +20,13 @@ def is_ipv6(addr):
         return False
     
 def getVideoID(URL):
-    """
-    Examples:
-    - http://youtu.be/SA2iWivDJiE
-    - http://www.youtube.com/watch?v=_oPAwA_Udwc&feature=feedu
-    - http://www.youtube.com/embed/SA2iWivDJiE
-    - http://www.youtube.com/v/SA2iWivDJiE?version=3&amp;hl=en_US
-    """
-    query = urlparse(value)
-    if query.hostname == 'youtu.be':
-        return query.path[1:]
-    if query.hostname in ('www.youtube.com', 'youtube.com'):
-        if query.path == '/watch':
-            p = parse_qs(query.query)
-            return p['v'][0]
-        if query.path[:7] == '/embed/':
-            return query.path.split('/')[2]
-        if query.path[:3] == '/v/':
-            return query.path.split('/')[2]
-    # fail?
-    return None
+    u_pars = urlparse(URL)
+    quer_v = parse_qs(u_pars.query).get('v')
+    if quer_v:
+        return quer_v[0]
+    pth = u_pars.path.split('/')
+    if pth:
+        return pth[-1]
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['SQLALCHEMY_DATABASE_URI']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -88,6 +75,8 @@ def query_video():
     videoID = getVideoID(videoURL)
     
     print videoURL
+    print videoID
+    
     result = read(id)
     '''
     if result is None:
