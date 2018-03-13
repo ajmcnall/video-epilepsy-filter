@@ -1,4 +1,5 @@
 import sys
+import datetime
 
 import numpy as np
 import cv2
@@ -55,6 +56,10 @@ def red_transition(previous_frame, current_frame):
     if red_count > previous_frame.raw_array.size / 36:
         return True
     return False  
+
+
+def convert_seconds_to_videotime(seconds_in):
+    return str(datetime.timedelta(seconds=seconds_in))
   
   
 # string is the name of the video we want to analyze
@@ -124,7 +129,12 @@ for begin, end in frame_tuples:
     else:
         merged_tuples.append([begin, end])
 
-print merged_tuples
+# From stackoverflow 775049
+timestamp_tuples = [(convert_seconds_to_videotime(element[0] / cv2.cv.CV_CAP_PROP_FPS), 
+                    convert_seconds_to_videotime(element[1] / cv2.cv.CV_CAP_PROP_FPS)) 
+                    for element in merged_tuples]
+
+print timestamp_tuples
 
 # Release everything if job is finished
 cap.release()
