@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 import cv2
 from frame import Frame
@@ -75,14 +77,16 @@ general_idxs = []
 red_idxs = []
 
 # counter allows us to know during which frame or second a transition is found
-frame_counter = 1
+frame_counter = 0
 
 # variables to keep track of consequtive frames for comparison purposes
 previous_frame = None
 current_frame = Frame(cap.read()[1]) # We only care about the frame data for the first part
 
+TRANSITION_THRESHOLD = 7
+frame_tuples = []   # a list of tuples that represent the start and end frames of epileptic regions
 while(cap.isOpened()):
-    ret, frame = cap.read()
+    ret, raw_frame = cap.read()
 
     # stop when no more frames to read
     if ret == False:
@@ -94,11 +98,40 @@ while(cap.isOpened()):
     # can be analyzed right after the Frame object is created.
     # This would work well if we're working with streams (Youtube).
     previous_frame = current_frame
-    current_frame = Frame(frame)
+    current_frame = Frame(raw_frame)
 
     if general_transition(previous_frame, current_frame):
         general_idxs.append(frame_counter)
+        # Since a transition frame was just found,
+        # we want to see if this will make it go beyond the threshold
+        # for epilepsy detection. 3.5 flashes (AKA 7 transitions) within 1 second
+        transition_counter = 0
+
+        # Lower bound is how far back we can go for it to count in our algorithm
+        # Should just be within the previous second
+        lower_bound = frame_counter - cv2.cv.CV_CAP_PROP_FPS
+        if lower_bound < 0:
+            lower_bound = 0
+
+        # Technically not needed
+        upper_bound = frame_counter
+        if lower_bound >= upper_bound:
+            sys.stderr.write('Error: lower_bound is too high.')
+
+        for idx, frame in enumerate(general_idxs):
+            if frame < lower_bound:
+                general_idxs.pop(idx)
+            else:
+                break
+        transition_counter = len(general_idxs)
+        if transition_counter >= TRANSITION_THRESHOLD:
+            frame_tuples.append((lower_bound, frame_counter))
+
     frame_counter += 1
+
+# Now that all the frames have been processed,
+# merge the frame intervals and convert to timestamps to be pushed into the database.
+# TODO
 
 
 # print "stop"
