@@ -7,10 +7,6 @@ from frame import Frame
 def general_transition(previous_frame, current_frame):
     height = previous_frame.raw_array.shape[0]
     width = previous_frame.raw_array.shape[1]
-    
-    # fixme - not sure what maximum luminance means
-    # # maximum L among all pixels in both frames
-    # max_L = 0.0
 
     # print(np.minimum(current_frame.L, previous_frame.L))
     # print(abs(current_frame.L - previous_frame.L))
@@ -61,16 +57,8 @@ def red_transition(previous_frame, current_frame):
     return False  
   
   
-def process_idxs(idxs):
-    # not finished yet - TODO
-    print(len(idxs))
-    idx_iter = iter(idxs)
-    pass
-  
-  
 # string is the name of the video we want to analyze
 cap = cv2.VideoCapture('../test_video.avi')
-# print cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
 # lists for all the found transitions
 general_idxs = []
@@ -91,8 +79,6 @@ while(cap.isOpened()):
     # stop when no more frames to read
     if ret == False:
         break
-    
-    # frames.append(Frame(frame))
 
     # Algorithm detection can be put here so that each new frame
     # can be analyzed right after the Frame object is created.
@@ -113,16 +99,8 @@ while(cap.isOpened()):
         if lower_bound < 0:
             lower_bound = 0
 
-        # Technically not needed
-        upper_bound = frame_counter
-        if lower_bound > upper_bound:
-            sys.stderr.write('Error: lower_bound is too high.')
-
         for idx, frame in enumerate(general_idxs):
             if frame < lower_bound - 1: # without the -1, we pop crucial frames
-                print frame
-                print lower_bound
-                print general_idxs
                 general_idxs.pop(idx)
             else:
                 break
@@ -132,13 +110,8 @@ while(cap.isOpened()):
 
     frame_counter += 1
 
-print frame_tuples
-
 # Now that all the frames have been processed,
 # merge the frame intervals and convert to timestamps to be pushed into the database.
-# TODO
-# if not frame_tuples:    # it's empty, nothing detected!
-#     pass
 
 # I got this from stackoverflow 15273693
 merged_tuples = []
@@ -148,29 +121,6 @@ for begin, end in frame_tuples:
     else:
         merged_tuples.append([begin, end])
 
-# print "stop"
-# # Start on second frame so you can compare it to first frame
-# for idx, current_frame in enumerate(frames):
-#     previous_frame = frames[idx - 1]
-
-#     # general oppositing transition formula
-#     if general_transition(previous_frame, current_frame):
-#         # opposing transition found
-#         general_idxs.append(idx)
-
-#     # red opposing transition formula
-# #    if red_transition(previous_frame, current_frame):
-#         # red transition found
-# #        red_idxs.append(idx)
-
-# TODO: general_idxs and red_idxs now have the indexes where there are potentially
-# dangerous flashes. Convert indexes to timestamps to be used in the UI.
-# If both lists are empty, video is clean.
-# process_idxs(general_idxs)
-# process_idxs(red_idxs)
-
-# print (general_idxs)
-# print (red_idxs)
 print merged_tuples
 
 # Release everything if job is finished
