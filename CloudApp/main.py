@@ -10,7 +10,14 @@ import sqlalchemy
 
 
 app = Flask(__name__)
-
+db = SQLAlchemy()
+app = Flask(__name__)
+app.config.from_pyfile('config.py')
+app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', False)
+db.init_app(app)
+with app.app_context():
+    db.create_all()
+    
 def is_ipv6(addr):
     """Checks if a given address is an IPv6 address."""
     try:
@@ -28,10 +35,8 @@ def getVideoID(URL):
     if pth:
         return pth[-1]
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['SQLALCHEMY_DATABASE_URI']
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+
 
 
     
@@ -48,13 +53,13 @@ class ProcessedVideos(db.Model):
 def from_sql(row):
     """Translates a SQLAlchemy model instance into a dictionary"""
     data = row.__dict__.copy()
-    data['id'] = row.id
+    data['videoID'] = row.videoID
     data.pop('_sa_instance_state')
     return data
 
 #Gets a video entry if there is one
-def read(id):
-    result = ProcessedVideos.query.get(id)
+def read(videoID):
+    result = ProcessedVideos.query.get(videoID)
     if not result:
         return None
     return from_sql(result)
@@ -77,15 +82,14 @@ def query_video():
     print videoURL
     print videoID
     
-    result = read(id)
-    '''
+    result = read(videoID)
+    
     if result is None:
         #isSafe = processVideo blah blah blah
+        #placeholder
+        isSafe = False
     else:
-        #Pare the value out of the result
-    '''
-    #placeholder for now
-    isSafe = False
+        isSafe = result['isSafe']
 
     output = '%r' % isSafe
 
