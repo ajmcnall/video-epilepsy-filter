@@ -70,39 +70,51 @@ def process_idxs(idxs):
 cap = cv2.VideoCapture('../test_video.avi')
 # print cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
-frames = []
+# lists for all the found transitions
+general_idxs = []
+red_idxs = []
 
-# fixme - remove the 60 limit later
-while(cap.isOpened() and len(frames) < 1000):
+# counter allows us to know during which frame or second a transition is found
+frame_counter = 1
+
+# variables to keep track of consequtive frames for comparison purposes
+previous_frame = None
+current_frame = Frame(cap.read()[1]) # We only care about the frame data for the first part
+
+while(cap.isOpened()):
     ret, frame = cap.read()
 
     # stop when no more frames to read
     if ret == False:
         break
     
-    frames.append(Frame(frame))
+    # frames.append(Frame(frame))
 
     # Algorithm detection can be put here so that each new frame
     # can be analyzed right after the Frame object is created.
     # This would work well if we're working with streams (Youtube).
+    previous_frame = current_frame
+    current_frame = Frame(frame)
 
-general_idxs = []
-red_idxs = []
-
-print "stop"
-# Start on second frame so you can compare it to first frame
-for idx, current_frame in enumerate(frames):
-    previous_frame = frames[idx - 1]
-
-    # general oppositing transition formula
     if general_transition(previous_frame, current_frame):
-        # opposing transition found
-        general_idxs.append(idx)
+        general_idxs.append(frame_counter)
+    frame_counter += 1
 
-    # red opposing transition formula
-#    if red_transition(previous_frame, current_frame):
-        # red transition found
-#        red_idxs.append(idx)
+
+# print "stop"
+# # Start on second frame so you can compare it to first frame
+# for idx, current_frame in enumerate(frames):
+#     previous_frame = frames[idx - 1]
+
+#     # general oppositing transition formula
+#     if general_transition(previous_frame, current_frame):
+#         # opposing transition found
+#         general_idxs.append(idx)
+
+#     # red opposing transition formula
+# #    if red_transition(previous_frame, current_frame):
+#         # red transition found
+# #        red_idxs.append(idx)
 
 # TODO: general_idxs and red_idxs now have the indexes where there are potentially
 # dangerous flashes. Convert indexes to timestamps to be used in the UI.
