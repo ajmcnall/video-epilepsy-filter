@@ -106,7 +106,7 @@ def query_video():
     
     #For postman use:
     #videoURL = request.form['videoURL']
-    videoURL = request.form.getlist('videoURL')
+    videoURL = request.form.getlist('videoURL')[0]
     videoID = getVideoID(videoURL)
     
     print videoURL
@@ -115,15 +115,16 @@ def query_video():
     result = readProcessedVideo(videoID)
     
     if result is None:
-        #isSafe = processVideo blah blah blah
-        #placeholder
-        isSafe = False
+        return json.dumps({
+            'isAnalyzed':'No'
+        })
     else:
         isSafe = result['isSafe']
 
     if isSafe:
         return json.dumps(
             {
+                'isAnalyzed':'Yes',
                 'isSafe':'Yes'
             })
     else:
@@ -131,8 +132,8 @@ def query_video():
         timestamps = {}
         for section in flaggedSections:
             timestamps[section['beginTime']] = section['endTime']
-        return json.dumps(
-        {
+        return json.dumps({
+            'isAnalyzed':'Yes',
             'isSafe':'No',
             'timestamps':timestamps
         })
