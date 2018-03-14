@@ -18,6 +18,8 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
     
+builtin_list = list
+
 def is_ipv6(addr):
     """Checks if a given address is an IPv6 address."""
     try:
@@ -38,7 +40,20 @@ def getVideoID(URL):
 
 
 
-
+class FlaggedSections(db.Model):
+    
+    __tablename__ = 'flagged_sections'
+    videoID = db.Column(db.String(11), db.ForeignKey('db.processed_videos.videoID'), primary_key=True, nullable=False)
+    beginTime = db.Column(db.Integer, primary_key=True, nullable=False)
+    endTime = db.Column(db.Integer, nullable=False)
+    
+    __table_args = (
+        db.CheckConstraint(endTime > beginTime),
+    )
+        
+    def __repr__(self):
+        return '<FlaggedSections(videoID= %s, beginTime= %d, endTime= %d)>' % (self.videoID, self.beginTime, self.endTime) 
+    
     
 #ProcessedVideos table in the database
 class ProcessedVideos(db.Model):
@@ -58,7 +73,7 @@ def from_sql(row):
     return data
 
 #Gets a video entry if there is one
-def read(videoID):
+def readProcessedVideo(videoID):
     result = ProcessedVideos.query.get(videoID)
     if not result:
         return None
@@ -66,12 +81,24 @@ def read(videoID):
 
 #Create a new entry
 # [START create]
-def create(data):
+def addProcessedVideo(data):
     video = ProcessedVideos(**data)
     db.session.add(video)
     db.session.commit()
     return from_sql(video)
 # [END create]
+
+def readTimeStamps(videoID):
+    query = (FlaggedSections.query
+             .order_by(FlaggedSections.beginTime))
+    results = builtin_list(map(from_sql, query.all()))
+    return results
+
+def addTimeStamps(data):
+    flaggedSection = FlaggedSections(**data)
+    db.session.add(flaggedSection)
+    db.session.commit()
+    return from_sql(flaggedSection)
 
 @app.route('/', methods=['POST'])
 def query_video():
@@ -82,7 +109,7 @@ def query_video():
     print videoURL
     print videoID
     
-    result = read(videoID)
+    result = readProcessedVideo(videoID)
     
     if result is None:
         #isSafe = processVideo blah blah blah
@@ -91,8 +118,14 @@ def query_video():
     else:
         isSafe = result['isSafe']
 
-    output = '%r' % isSafe
-
+    if isSafe:
+        output = 'Safe'
+    else:
+        flaggedSections = readTimeStamps(videoID)
+        output = 'Not Safe. Flagged Sections: '
+        for section in flaggedSections:
+            output += '%d-%d' % (section['beginTime'], section['endTime']) + ', '
+    
     return output
 
 
