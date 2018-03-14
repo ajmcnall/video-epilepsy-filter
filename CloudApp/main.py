@@ -91,6 +91,7 @@ def addProcessedVideo(data):
 
 def readTimeStamps(videoID):
     query = (FlaggedSections.query
+             .filter(FlaggedSections.videoID==videoID)
              .order_by(FlaggedSections.beginTime))
     results = builtin_list(map(from_sql, query.all()))
     return results
