@@ -159,6 +159,13 @@ function click(e) {
       url: server_url,
       data: {'videoURL': url},
       success: function(data) {
+        result = JSON.parse(data);
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {info : result}, function(response) {
+            console.log(response.farewell);
+          });
+        });
+
         bkg.console.log("success");
         bkg.console.log(data);
         bkg.console.log(JSON.parse(data));
