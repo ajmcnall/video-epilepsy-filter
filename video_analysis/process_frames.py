@@ -124,7 +124,6 @@ while(cap.isOpened()):
 fps = cv2.cv.CV_CAP_PROP_FPS
 fps = 12    # FIXME: remove in the future, currently CV_CAP_PROP_FPS is inaccurate
 frame_tuples = [(element[0] / fps, element[1] / fps) for element in frame_tuples]
-print frame_tuples
 
 # I got this from stackoverflow 15273693
 merged_tuples = []
@@ -133,7 +132,6 @@ for begin, end in frame_tuples:
         merged_tuples[-1][1] = max(merged_tuples[-1][1], end)
     else:
         merged_tuples.append([begin, end])
-print merged_tuples
 
 # From stackoverflow 775049
 timestamp_tuples = [(convert_seconds_to_videotime(element[0]), 
