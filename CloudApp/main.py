@@ -103,7 +103,9 @@ def addTimeStamps(data):
 @app.route('/', methods=['POST'])
 def query_video():
     
-    videoURL = request.form['videoURL']
+    #For postman use:
+    #videoURL = request.form['videoURL']
+    videoURL = request.form.getlist('videoURL')
     videoID = getVideoID(videoURL)
     
     print videoURL
