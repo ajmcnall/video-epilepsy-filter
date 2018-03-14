@@ -122,30 +122,10 @@
 
 console.log("shit is running");
 var bkg = chrome.extension.getBackgroundPage();
-var server_url = "http://127.0.0.1:5000/";
 
-var form = new FormData();
-form.append("video-url", "https://www.youtube.com/watch?v=C0DPdy98e4c");
-form.append("analyze", "true");
+var server_url = "https://epilepsy-video-filter.appspot.com"
+// local = var server_url = "http://127.0.0.1:5000/"
 
-var settings = {
-  "async": true,
-  "crossDomain": true,
-  "url": "http://127.0.0.1:5000/",
-  "method": "POST",
-  "headers": {
-    "cache-control": "no-cache",
-    "postman-token": "54543e18-7909-e0ec-5bf9-c3f28aea8c9e"
-  },
-  "processData": false,
-  "contentType": false,
-  "mimeType": "multipart/form-data",
-  "data": form
-}
-
-$.ajax(settings).done(function (response) {
-  console.log(response);
-});
 
 function click(e) {
   bkg.console.log('Analyze button clicked');
@@ -159,9 +139,10 @@ function click(e) {
       type: "POST",
       url: server_url,
       data: {'video-url': url},
-      success: function() {
-        bkg.console.log("anything");
-        console.log("fasdfasdjfasdf");        
+      success: function(data) {
+        bkg.console.log("success");
+        bkg.console.log(data);
+        bkg.console.log(JSON.parse(data));
       },
       error: function(e, status, msg) {
         bkg.console.log(status);
