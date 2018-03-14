@@ -1,0 +1,31 @@
+{
+	"manifest_version": 2,
+
+	"name": "Epilepsy extension",
+	"description": "This extension allows the user to change the background color",
+	"version": "1.0",
+
+	"browser_action": {
+		"default_icon": "icon.png",
+		"default_popup": "popup.html",
+		"default_title": "analyze the video"
+	},
+
+	"background": {
+		"scripts": ["jquery-3.3.1.min.js", "background.js"]
+	},
+
+	"content_scripts": [{
+		"matches": ["*://www.youtube.com/*"],
+		"js": ["content.js"],
+		"run_at": "document_idle"
+	}],
+	
+	"permissions": [
+		"activeTab",
+		"tabs",
+		"storage",
+		"webNavigation",
+		"http://*/"
+	]
+}
