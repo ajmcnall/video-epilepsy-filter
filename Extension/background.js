@@ -140,6 +140,16 @@ function click(e) {
       url: server_url,
       data: {'video-url': url},
       success: function(data) {
+	chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){  
+        if(changeInfo && changeInfo.status == "complete") {
+		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+		chrome.tabs.sendMessage(tabs[0].id, {"data":data}, function(response) {
+			console.log(response.farewell)
+		})
+        	})
+     	}
+ 	})
+
         bkg.console.log("success");
         bkg.console.log(data);
         bkg.console.log(JSON.parse(data));

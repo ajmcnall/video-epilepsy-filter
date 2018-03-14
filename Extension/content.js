@@ -3,16 +3,13 @@
 // useful features.
 var video = document.getElementsByTagName("video")[0];
 
-// Obviously this should be pulled from a database/ generated in real time. Not hardcoded.
-var timestamps = {"https://www.youtube.com/watch?v=Yw_YDvLWKnY" : [[10,20],[30,40]],
-					"https://www.youtube.com/watch?v=YHYz_PLEAbc" : [[10,50],[60,100]]};
-
 // This is where the background message is received.
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 
-		var time = timestamps[request.greeting];
-		if(time) {
+		var data = request.data
+
+		if(data.isSafe == 'Yes') {
 			alert("This video has been flagged as potentially seizure inducing.\nYou will be prompted to skip certain sections.")
 		}
 
