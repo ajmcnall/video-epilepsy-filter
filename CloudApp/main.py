@@ -1,6 +1,7 @@
 import logging
 import os
 import socket
+import json
 
 from urlparse import parse_qs, urlparse
 
@@ -121,14 +122,23 @@ def query_video():
         isSafe = result['isSafe']
 
     if isSafe:
-        output = 'Safe'
+        return json.dumps(
+            {
+                'isSafe':'Yes'
+            })
     else:
         flaggedSections = readTimeStamps(videoID)
-        output = 'Not Safe. Flagged Sections: '
+        timestamps = {}
         for section in flaggedSections:
-            output += '%d-%d' % (section['beginTime'], section['endTime']) + ', '
+            timestamps[section['beginTime']] = section['endTime']
+        return json.dumps(
+        {
+            'isSafe':'No',
+            'timestamps':timestamps
+        })
     
-    return output
+    
+    
 
 
 @app.errorhandler(500)
