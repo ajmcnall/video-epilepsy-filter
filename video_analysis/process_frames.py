@@ -84,7 +84,7 @@ while(cap.isOpened()):
     # stop when no more frames to read
     if ret == False:
         break
-
+    
     # Algorithm detection can be put here so that each new frame
     # can be analyzed right after the Frame object is created.
     # This would work well if we're working with streams (Youtube).
@@ -121,6 +121,11 @@ while(cap.isOpened()):
 # Now that all the frames have been processed,
 # merge the frame intervals and convert to timestamps to be pushed into the database.
 
+fps = cv2.cv.CV_CAP_PROP_FPS
+fps = 12    # FIXME: remove in the future, currently CV_CAP_PROP_FPS is inaccurate
+frame_tuples = [(element[0] / fps, element[1] / fps) for element in frame_tuples]
+print frame_tuples
+
 # I got this from stackoverflow 15273693
 merged_tuples = []
 for begin, end in frame_tuples:
@@ -128,10 +133,11 @@ for begin, end in frame_tuples:
         merged_tuples[-1][1] = max(merged_tuples[-1][1], end)
     else:
         merged_tuples.append([begin, end])
+print merged_tuples
 
 # From stackoverflow 775049
-timestamp_tuples = [(convert_seconds_to_videotime(element[0] / cv2.cv.CV_CAP_PROP_FPS), 
-                    convert_seconds_to_videotime(element[1] / cv2.cv.CV_CAP_PROP_FPS)) 
+timestamp_tuples = [(convert_seconds_to_videotime(element[0]), 
+                    convert_seconds_to_videotime(element[1])) 
                     for element in merged_tuples]
 
 print timestamp_tuples
