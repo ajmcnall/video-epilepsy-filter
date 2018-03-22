@@ -17,7 +17,7 @@ def general_transition(previous_frame, current_frame):
                 (abs(current_frame.L - previous_frame.L) > \
                 (np.maximum(current_frame.L, previous_frame.L) * 0.1))]
 
-    if len(selection) > (previous_frame.raw_array.size / 36):
+    if len(selection) > (previous_frame.raw_array.size / 9):
         return True
     return False
 
@@ -63,7 +63,7 @@ def convert_seconds_to_videotime(seconds_in):
   
   
 # string is the name of the video we want to analyze
-cap = cv2.VideoCapture('aotl')
+cap = cv2.VideoCapture('allofthelights.3gpp')
 
 # lists for all the found transitions
 general_idxs = []
@@ -100,13 +100,13 @@ while(cap.isOpened()):
 
         # Lower bound is how far back we can go for it to count in our algorithm
         # Should just be within the previous second
-        lower_bound = frame_counter - cv2.cv.CV_CAP_PROP_FPS
+        lower_bound = frame_counter - cap.get(cv2.CAP_PROP_FPS)
         if lower_bound < 0:
             lower_bound = 0
 
-        for idx, frame in enumerate(general_idxs):
+        for frame in general_idxs[:]:
             if frame < lower_bound - 1: # without the -1, we pop crucial frames
-                general_idxs.pop(idx)
+                general_idxs.remove(frame)
             else:
                 break
         transition_counter = len(general_idxs)
@@ -121,8 +121,8 @@ while(cap.isOpened()):
 # Now that all the frames have been processed,
 # merge the frame intervals and convert to timestamps to be pushed into the database.
 
-fps = cv2.cv.CV_CAP_PROP_FPS
-fps = 12    # FIXME: remove in the future, currently CV_CAP_PROP_FPS is inaccurate
+fps = cap.get(cv2.CAP_PROP_FPS)
+#fps = 12    # FIXME: remove in the future, currently CV_CAP_PROP_FPS is inaccurate
 frame_tuples = [(element[0] / fps, element[1] / fps) for element in frame_tuples]
 
 # I got this from stackoverflow 15273693
