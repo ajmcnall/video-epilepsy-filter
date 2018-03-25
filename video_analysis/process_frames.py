@@ -135,10 +135,9 @@ def analyze(filename):
     timestamp_tuples = [(element[0], element[1])
                         for element in merged_tuples]
 
-    print timestamp_tuples
-
     # Release everything if job is finished
     cap.release()
     cv2.destroyAllWindows()
 
+    return timestamp_tuples
 
