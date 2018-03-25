@@ -6,16 +6,12 @@ import cv2
 from frame import Frame
 
 def general_transition(previous_frame, current_frame):
-    height = previous_frame.raw_array.shape[0]
-    width = previous_frame.raw_array.shape[1]
 
-    # print(np.minimum(current_frame.L, previous_frame.L))
-    # print(abs(current_frame.L - previous_frame.L))
-    # print(np.maximum(current_frame.L, previous_frame.L) * 0.1)
+    relative_max = max(np.amax(previous_frame.L), np.amax(current_frame.L))
 
     selection = current_frame.L[(np.minimum(current_frame.L, previous_frame.L) < 0.8) & \
                 (abs(current_frame.L - previous_frame.L) > \
-                (np.maximum(current_frame.L, previous_frame.L) * 0.1))]
+                relative_max * 0.1)]
 
     if len(selection) > (previous_frame.raw_array.size / 9):
         return True
@@ -61,86 +57,88 @@ def red_transition(previous_frame, current_frame):
 def convert_seconds_to_videotime(seconds_in):
     return str(datetime.timedelta(seconds=seconds_in))
   
-  
-# string is the name of the video we want to analyze
-cap = cv2.VideoCapture('allofthelights.3gpp')
+def analyze(filename):
 
-# lists for all the found transitions
-general_idxs = []
-red_idxs = []
+    # string is the name of the video we want to analyze
+    cap = cv2.VideoCapture(filename)
 
-# counter allows us to know during which frame or second a transition is found
-frame_counter = 0
+    # lists for all the found transitions
+    general_idxs = []
+    red_idxs = []
 
-# variables to keep track of consequtive frames for comparison purposes
-previous_frame = None
-current_frame = Frame(cap.read()[1]) # We only care about the frame data for the first part
+    # counter allows us to know during which frame or second a transition is found
+    frame_counter = 0
 
-TRANSITION_THRESHOLD = 7
-frame_tuples = []   # a list of tuples that represent the start and end frames of epileptic regions
-while(cap.isOpened()):
-    ret, raw_frame = cap.read()
+    # variables to keep track of consequtive frames for comparison purposes
+    previous_frame = None
+    current_frame = Frame(cap.read()[1]) # We only care about the frame data for the first part
 
-    # stop when no more frames to read
-    if ret == False:
-        break
-    
-    # Algorithm detection can be put here so that each new frame
-    # can be analyzed right after the Frame object is created.
-    # This would work well if we're working with streams (Youtube).
-    previous_frame = current_frame
-    current_frame = Frame(raw_frame)
+    TRANSITION_THRESHOLD = 7
+    frame_tuples = []   # a list of tuples that represent the start and end frames of epileptic regions
+    while(cap.isOpened()):
+        ret, raw_frame = cap.read()
 
-    if general_transition(previous_frame, current_frame):
-        general_idxs.append(frame_counter)
-        # Since a transition frame was just found,
-        # we want to see if this will make it go beyond the threshold
-        # for epilepsy detection. 3.5 flashes (AKA 7 transitions) within 1 second
-        transition_counter = 0
+        # stop when no more frames to read
+        if ret == False:
+            break
+        
+        # Algorithm detection can be put here so that each new frame
+        # can be analyzed right after the Frame object is created.
+        # This would work well if we're working with streams (Youtube).
+        previous_frame = current_frame
+        current_frame = Frame(raw_frame)
 
-        # Lower bound is how far back we can go for it to count in our algorithm
-        # Should just be within the previous second
-        lower_bound = frame_counter - cap.get(cv2.CAP_PROP_FPS)
-        if lower_bound < 0:
-            lower_bound = 0
+        if general_transition(previous_frame, current_frame):
+            general_idxs.append(frame_counter)
+            # Since a transition frame was just found,
+            # we want to see if this will make it go beyond the threshold
+            # for epilepsy detection. 3.5 flashes (AKA 7 transitions) within 1 second
+            transition_counter = 0
 
-        for frame in general_idxs[:]:
-            if frame < lower_bound - 1: # without the -1, we pop crucial frames
-                general_idxs.remove(frame)
-            else:
-                break
-        transition_counter = len(general_idxs)
-        if transition_counter >= TRANSITION_THRESHOLD:
-            # The epileptic range should be:
-            # From the first frame within the past second to have been detected
-            # To the most recently detected frame
-            frame_tuples.append((general_idxs[0], frame_counter))
+            # Lower bound is how far back we can go for it to count in our algorithm
+            # Should just be within the previous second
+            lower_bound = frame_counter - cap.get(cv2.CAP_PROP_FPS)
+            if lower_bound < 0:
+                lower_bound = 0
 
-    frame_counter += 1
+            for frame in general_idxs[:]:
+                if frame < lower_bound - 1: # without the -1, we pop crucial frames
+                    general_idxs.remove(frame)
+                else:
+                    break
+            transition_counter = len(general_idxs)
+            if transition_counter >= TRANSITION_THRESHOLD:
+                # The epileptic range should be:
+                # From the first frame within the past second to have been detected
+                # To the most recently detected frame
+                frame_tuples.append((general_idxs[0], frame_counter))
 
-# Now that all the frames have been processed,
-# merge the frame intervals and convert to timestamps to be pushed into the database.
+        frame_counter += 1
 
-fps = cap.get(cv2.CAP_PROP_FPS)
-#fps = 12    # FIXME: remove in the future, currently CV_CAP_PROP_FPS is inaccurate
-frame_tuples = [(element[0] / fps, element[1] / fps) for element in frame_tuples]
+    # Now that all the frames have been processed,
+    # merge the frame intervals and convert to timestamps to be pushed into the database.
 
-# I got this from stackoverflow 15273693
-merged_tuples = []
-for begin, end in frame_tuples:
-    if merged_tuples and merged_tuples[-1][1] >= begin - 1:
-        merged_tuples[-1][1] = max(merged_tuples[-1][1], end)
-    else:
-        merged_tuples.append([begin, end])
+    fps = cap.get(cv2.CAP_PROP_FPS)
 
-# From stackoverflow 775049
-timestamp_tuples = [(convert_seconds_to_videotime(element[0]), 
-                    convert_seconds_to_videotime(element[1])) 
-                    for element in merged_tuples]
+    #fps = 12    # FIXME: remove in the future, currently CV_CAP_PROP_FPS is inaccurate
+    frame_tuples = [(element[0] / fps, element[1] / fps) for element in frame_tuples]
 
-print timestamp_tuples
+    # I got this from stackoverflow 15273693
+    merged_tuples = []
+    for begin, end in frame_tuples:
+        if merged_tuples and merged_tuples[-1][1] >= begin - 1:
+            merged_tuples[-1][1] = max(merged_tuples[-1][1], end)
+        else:
+            merged_tuples.append([begin, end])
 
-# Release everything if job is finished
-cap.release()
-cv2.destroyAllWindows()
+    # From stackoverflow 775049
+    timestamp_tuples = [(element[0], element[1])
+                        for element in merged_tuples]
 
+    print timestamp_tuples
+
+    # Release everything if job is finished
+    cap.release()
+    cv2.destroyAllWindows()
+
+analyze("pokemon.mp4")
