@@ -82,8 +82,8 @@ def readProcessedVideo(videoID):
 
 #Create a new entry
 # [START create]
-def addProcessedVideo(data):
-    video = ProcessedVideos(**data)
+def addProcessedVideo(**data):
+    video = ProcessedVideos(data)
     db.session.add(video)
     db.session.commit()
     return from_sql(video)
@@ -96,11 +96,37 @@ def readTimeStamps(videoID):
     results = builtin_list(map(from_sql, query.all()))
     return results
 
-def addTimeStamps(data):
-    flaggedSection = FlaggedSections(**data)
+def addTimeStamps(**data):
+    flaggedSection = FlaggedSections(data)
     db.session.add(flaggedSection)
     db.session.commit()
     return from_sql(flaggedSection)
+
+@app.route('/analyze', methods=['POST'])
+def analyze_video():
+
+    videoURL = request.form.getlist('videoURL')[0]
+    videoID = getVideoID(videoURL)
+
+    timestamps = [] 
+    #timestamps = somefunction
+
+    if not timestamps:
+        #Flag video as safe
+        addProcessedVideo(videoID=videoID, isSafe=True)
+        return json.dumps({
+            'isSafe':'Yes'
+        })
+    else:
+        #Flag video as not safe
+        addProcessedVideo(videoID=videoID, isSafe=False)
+        #TODO: Store timestamps
+        for timestamp in timestamps:
+            addTimeStamps(videoID=videoID, beginTime=timestamp[0], endTime=timestamp[1])
+        return json.dumps({
+            'isSafe':'No',
+            'timestamps':timestamps
+        })
 
 @app.route('/', methods=['POST'])
 def query_video():
@@ -109,9 +135,6 @@ def query_video():
     #videoURL = request.form['videoURL']
     videoURL = request.form.getlist('videoURL')[0]
     videoID = getVideoID(videoURL)
-    
-    print videoURL
-    print videoID
     
     result = readProcessedVideo(videoID)
     
