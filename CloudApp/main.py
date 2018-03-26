@@ -10,6 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 
 from video_analysis.process_frames import analyze
+from pytube import YouTube
 
 
 app = Flask(__name__)
@@ -46,7 +47,7 @@ def getVideoID(URL):
 class FlaggedSections(db.Model):
     
     __tablename__ = 'flagged_sections'
-    videoID = db.Column(db.String(11), db.ForeignKey('db.processed_videos.videoID'), primary_key=True, nullable=False)
+    videoID = db.Column(db.String(11), db.ForeignKey('processed_videos.videoID'), primary_key=True, nullable=False)
     beginTime = db.Column(db.Integer, primary_key=True, nullable=False)
     endTime = db.Column(db.Integer, nullable=False)
     
@@ -85,7 +86,7 @@ def readProcessedVideo(videoID):
 #Create a new entry
 # [START create]
 def addProcessedVideo(**data):
-    video = ProcessedVideos(data)
+    video = ProcessedVideos(**data)
     db.session.add(video)
     db.session.commit()
     return from_sql(video)
@@ -99,10 +100,9 @@ def readTimeStamps(videoID):
     return results
 
 def addTimeStamps(**data):
-    flaggedSection = FlaggedSections(data)
+    flaggedSection = FlaggedSections(**data)
     db.session.add(flaggedSection)
     db.session.commit()
-    return from_sql(flaggedSection)
 
 @app.route('/analyze', methods=['POST'])
 def analyze_video():
@@ -110,8 +110,10 @@ def analyze_video():
     videoURL = request.form.getlist('videoURL')[0]
     videoID = getVideoID(videoURL)
 
+    vidFilename = 'testVideo'
     timestamps = [] 
-    #timestamps = somefunction
+    YouTube(videoURL).streams.filter(subtype='mp4').first().download(filename=vidFilename)
+    timestamps = analyze(vidFilename + ".mp4")
 
     if not timestamps:
         #Flag video as safe

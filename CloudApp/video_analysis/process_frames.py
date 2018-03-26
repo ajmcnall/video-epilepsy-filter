@@ -3,7 +3,7 @@ import datetime
 
 import numpy as np
 import cv2
-from frame import Frame
+from Frame import Frame
 
 def general_transition(previous_frame, current_frame):
 
@@ -59,6 +59,7 @@ def convert_seconds_to_videotime(seconds_in):
   
 def analyze(filename):
 
+    print filename
     # string is the name of the video we want to analyze
     cap = cv2.VideoCapture(filename)
 
@@ -75,9 +76,11 @@ def analyze(filename):
 
     TRANSITION_THRESHOLD = 7
     frame_tuples = []   # a list of tuples that represent the start and end frames of epileptic regions
+    counter = 0
     while(cap.isOpened()):
         ret, raw_frame = cap.read()
-
+        print '%r %d' % (ret, counter)
+        counter += 1
         # stop when no more frames to read
         if ret == False:
             break

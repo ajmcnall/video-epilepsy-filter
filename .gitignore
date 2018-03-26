@@ -1,3 +1,6 @@
+CloudApp/video_analysis/*.pyc
+CloudApp/*.pyc
+*.pyc
 .ipynb_checkpoints/
 CloudApp/.ipynb_checkpoints/
 Epilepsy Video Filter-0a5e4703c666.json
