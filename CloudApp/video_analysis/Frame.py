@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.core.multiarray
 import cv2 as cv
 
 class Frame:

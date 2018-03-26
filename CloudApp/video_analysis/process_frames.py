@@ -2,6 +2,7 @@ import sys
 import datetime
 
 import numpy as np
+import numpy.core.multiarray
 import cv2
 from Frame import Frame
 

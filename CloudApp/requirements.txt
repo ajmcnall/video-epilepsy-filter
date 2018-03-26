@@ -4,5 +4,5 @@ gunicorn==19.7.1
 Flask-SQLAlchemy==2.3.2
 PyMySQL==0.8.0
 -e git://github.com/nficano/pytube#egg=pytube
-numpy==1.6.1
+numpy==1.14.2
 opencv-python==3.4.0.12
