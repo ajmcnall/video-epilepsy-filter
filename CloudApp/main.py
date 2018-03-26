@@ -9,6 +9,8 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy
 
+from video_analysis.process_frames import analyze
+
 
 app = Flask(__name__)
 db = SQLAlchemy()
