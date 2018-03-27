@@ -20,4 +20,4 @@ ADD . /app
 # ADD ./app/ /app
 # ADD app.yaml /app/
 
-CMD gunicorn -b :$PORT main:app
+CMD gunicorn -c gunicorn.conf.py -b :$PORT

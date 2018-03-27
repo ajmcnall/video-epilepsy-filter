@@ -60,7 +60,6 @@ def convert_seconds_to_videotime(seconds_in):
   
 def analyze(filename):
 
-    print filename
     # string is the name of the video we want to analyze
     cap = cv2.VideoCapture(filename)
 
@@ -80,7 +79,6 @@ def analyze(filename):
     counter = 0
     while(cap.isOpened()):
         ret, raw_frame = cap.read()
-        print '%r %d' % (ret, counter)
         counter += 1
         # stop when no more frames to read
         if ret == False:
