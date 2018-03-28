@@ -110,10 +110,11 @@ def analyze_video():
     videoURL = request.form.getlist('videoURL')[0]
     videoID = getVideoID(videoURL)
 
-    vidFilename = 'testVideo'
+    #TODO: detect and handle if a file is already being analyzed
     timestamps = [] 
-    YouTube(videoURL).streams.filter(subtype='mp4').first().download(filename=vidFilename)
-    timestamps = analyze(vidFilename + ".mp4")
+    YouTube(videoURL).streams.filter(progressive=False, mime_type='video/mp4').order_by('filesize').asc().first().download(filename=videoID)
+    timestamps = analyze(videoID + ".mp4")
+    os.remove(videoID + ".mp4")
 
     if not timestamps:
         #Flag video as safe
