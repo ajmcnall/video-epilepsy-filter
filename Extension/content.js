@@ -1,40 +1,58 @@
-// Turns out you can pull an HTML5 audio/video element right off a youtube page,
-// this isn't even using the Youtube api, not sure if it will be needed. HTML5 objects have lots of
-// useful features.
-var video = document.getElementsByTagName("video")[0];
+function handleTime(e) {
+	var time = e.target.time;
+	var video = e.target;
+	for(var j = 0; j < time.length; j++) {
+		time[j][0] = Math.round(time[j][0]);
+		time[j][1] = Math.round(time[j][1]);
+	}
+	for(var i = time.length - 1; i >= 0; i--) {
+		if(video.currentTime >= time[i][0] && video.currentTime < time[i][1]) {
+			video.pause();
+			var decision = confirm("Do you want to skip to the next segment?");
+			video.play();
+
+			if(decision == true) { // Skip section
+				video.currentTime = time[i][1];
+			}
+			else { // Wait until past section
+				time.splice(i,1);
+			}					
+		}
+	}
+}
 
 // This is where the background message is received.
 chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
+	
+		var video = document.getElementsByTagName("video")[0];
+		video.removeEventListener("timeupdate", handleTime, false);
+		var data = request.info;
 
-		var data = request.data
+		if(data["isAnalyzed"] && data["isAnalyzed"] == "No") {
+			video.pause();
+			var decision = confirm("This video has not been analyzed. Would you like to wait while it is analyzed?");
+			if(decision) {
+				sendResponse({analyze : true});			
+			}
+			else {
+				video.play();
+				sendResponse({analyze : true});
+			}
+		}	
+		else {
+			if(data["isSafe"] && data["isSafe"] == "Yes") {
+				alert("This video has been analyzed and is deemed safe");
+			}
+			else {
+				var time = data["timestamps"];
+ 				alert("This video has been flagged as potentially seizure inducing.\nYou will be prompted to skip certain sections.")
 
-		if(data.isSafe == 'Yes') {
-			alert("This video has been flagged as potentially seizure inducing.\nYou will be prompted to skip certain sections.")
+ 				// Every second, check if we are in a flagged section
+ 				video.time = time;
+	 			video.addEventListener("timeupdate", handleTime, false);
+	 			
+	 		}
 		}
-
-		// I tried to make a loop out of these event listeners but it wasn't working. Something about javascript I'm not
-		// understanding.
-		video.addEventListener("timeupdate", function() {
-			if(video.currentTime >= time[0][0] && video.currentTime < time[0][1]) {
-				video.pause();
-				if(confirm("Do you want to skip to the next segment?") == true) {
-					video.currentTime = time[0][1];
-					video.play();
-					video.removeEventListener("timeupdate",arguments.callee,false);
-				}
-			}
-		});
-
-		video.addEventListener("timeupdate", function() {
-			if(video.currentTime >= time[1][0] && video.currentTime < time[1][1]) {
-				video.pause();
-				if(confirm("Do you want to the skip to next segment?") == true) {
-					video.currentTime = time[1][1];
-					video.play();
-					video.removeEventListener("timeupdate",arguments.callee,false);
-				}
-			}
-		});
-	});
-
+	}
+);
