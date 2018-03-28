@@ -26,6 +26,7 @@
 		"tabs",
 		"storage",
 		"webNavigation",
-		"http://*/"
+		"http://*/",
+		"https://*/"
 	]
 }
